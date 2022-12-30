@@ -5,7 +5,7 @@ const ExpressError = require("../expressError")
 // import the database module
 const db = require('../db');
 
-// GET /companies
+// GET all /companies
 router.get('/', async (req, res) => {
   try {
     const result = await db.query('SELECT code, name FROM companies');
@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /companies/[code]
+// GET by the /companies/[code]
 router.get('/:code', async (req, res) => {
   try {
     const result = await db.query('SELECT code, name, description FROM companies WHERE code = $1', [req.params.code]);
@@ -28,10 +28,11 @@ router.get('/:code', async (req, res) => {
   }
 });
 
-// POST /companies
+// POST a company to the database /companies
 router.post('/', async (req, res) => {
   try {
-    const {code, name, description} = req.body;
+    const {name, description} = req.body;
+    const code = slugify(name, { lower: true });
     const result = await db.query(
       'INSERT INTO companies (code, name, description) VALUES ($1, $2, $3) RETURNING code, name, description',
       [code, name, description]
@@ -42,7 +43,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT /companies/[code]
+// PUT an update on existing /companies/[code]
 router.put('/:code', async (req, res) => {
   try {
     const {name, description} = req.body;
@@ -59,7 +60,7 @@ router.put('/:code', async (req, res) => {
   }
 });
 
-// DELETE /companies/[code]
+// DELETE company /companies/[code]
 router.delete('/:code', async (req, res) => {
   try {
     const result = await db.query('DELETE FROM companies WHERE code = $1', [req.params.code]);
